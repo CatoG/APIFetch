@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather Report</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      color: #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      transition: background 1.2s ease;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 300;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #a8d8ea;
+      margin-bottom: 32px;
+    }
+
+    form {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 28px 32px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: flex-end;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 32px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+      min-width: 120px;
+    }
+
+    label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #a8d8ea;
+    }
+
+    input {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus { border-color: #a8d8ea; }
+
+    button {
+      background: #a8d8ea;
+      color: #1a1a2e;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 24px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      align-self: flex-end;
+    }
+
+    button:hover { background: #c9e8f5; }
+    button:active { transform: scale(0.97); }
+
+    .btn-locate {
+      background: transparent;
+      color: #a8d8ea;
+      border: 1px solid #a8d8ea;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      align-self: flex-end;
+      white-space: nowrap;
+    }
+
+    .btn-locate:hover { background: rgba(168,216,234,0.1); }
+
+    .hourly-strip {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 4px 0 12px;
+      margin-bottom: 20px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.1) transparent;
+    }
+
+    .hourly-strip::-webkit-scrollbar { height: 4px; }
+    .hourly-strip::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+
+    .hourly-card {
+      flex: 0 0 auto;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 12px 14px;
+      text-align: center;
+      min-width: 72px;
+    }
+
+    .hourly-card .h-time {
+      font-size: 0.7rem;
+      color: #888;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .hourly-card .h-temp {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .hourly-card .h-cond {
+      font-size: 0.65rem;
+      color: #aaa;
+      line-height: 1.3;
+    }
+
+    .hourly-card.now {
+      border-color: #a8d8ea;
+      background: rgba(168,216,234,0.08);
+    }
+
+    #weatherInfo { width: 100%; max-width: 600px; }
+
+    .weather-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 20px;
+    }
+
+    .weather-card h2 {
+      font-size: 1.1rem;
+      font-weight: 400;
+      color: #a8d8ea;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .weather-card .meta {
+      font-size: 0.75rem;
+      color: #888;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .weather-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .weather-item {
+      background: rgba(255,255,255,0.04);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+
+    .weather-item .label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #888;
+      margin-bottom: 4px;
+    }
+
+    .weather-item .value {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #fff;
+    }
+
+    .raw-json {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 20px 24px;
+    }
+
+    .raw-json h3 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #a8d8ea;
+      margin-bottom: 12px;
+    }
+
+    .raw-json pre {
+      font-size: 0.78rem;
+      color: #aaa;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <h1>Weather Report</h1>
+
+  <form id="weatherForm">
+    <div class="field">
+      <label for="lat">Latitude</label>
+      <input type="text" id="lat" name="lat" value="59.7833">
+    </div>
+    <div class="field">
+      <label for="lon">Longitude</label>
+      <input type="text" id="lon" name="lon" value="10.7976">
+    </div>
+    <div class="field">
+      <label for="altitude">Altitude (m)</label>
+      <input type="text" id="altitude" name="altitude" value="40">
+    </div>
+    <button type="submit">Get Weather</button>
+    <button type="button" class="btn-locate" onclick="useMyLocation()">&#9737; My Location</button>
+  </form>
+
+  <div id="weatherInfo"></div>
+  <script src="./weather_report.js"></script>
+</body>
+</html>
