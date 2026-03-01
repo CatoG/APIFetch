@@ -31,6 +31,21 @@ function getHourlyColor(symbolCode) {
   return { bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.15)', text: '#e0e0e0' };
 }
 
+function getHeroImage(symbolCode) {
+  const s = (symbolCode || '').toLowerCase();
+  if (s.includes('thunder'))    return 'https://images.unsplash.com/photo-1605727216801-e27ce1d0cc28?w=900&q=70';
+  if (s.includes('snow'))       return 'https://images.unsplash.com/photo-1491002052546-bf38f186af56?w=900&q=70';
+  if (s.includes('sleet'))      return 'https://images.unsplash.com/photo-1548777123-e216912df7d8?w=900&q=70';
+  if (s.includes('rain') || s.includes('shower') || s.includes('drizzle')) return 'https://images.unsplash.com/photo-1519692933481-e162a57d6721?w=900&q=70';
+  if (s.includes('fog'))        return 'https://images.unsplash.com/photo-1543968996-ee822b8176ba?w=900&q=70';
+  if (s.includes('overcast'))   return 'https://images.unsplash.com/photo-1504608524841-42584120d693?w=900&q=70';
+  if (s.includes('cloudy'))     return 'https://images.unsplash.com/photo-1534088568595-a066f410bcda?w=900&q=70';
+  if (s.includes('night'))      return 'https://images.unsplash.com/photo-1470813740244-df37b8c1edcb?w=900&q=70';
+  if (s.includes('fair') || s.includes('partlycloudy')) return 'https://images.unsplash.com/photo-1601297183305-6df142704ea2?w=900&q=70';
+  return 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=70';
+}
+
+
 function useMyLocation() {
   if (!navigator.geolocation) {
     alert('Geolocation is not supported by your browser.');
@@ -102,27 +117,50 @@ function showweatherDetails(event) {
               <div class="h-cond">${cond || '—'}</div>
             </div>`;
           }).join('');
+          const heroImage = getHeroImage(summary);
           weatherInfo.innerHTML = `
-            <div class="hourly-strip">${hourlyCards}</div>
-            <div class="weather-card">
-              <h2>Weather at ${lat}, ${lon}</h2>
-              <p class="meta">Data time: ${dataTime} &nbsp;|&nbsp; Forecast updated: ${updatedAt}</p>
-              <div class="weather-grid">
-                <div class="weather-item"><div class="label">Temperature</div><div class="value">${details.air_temperature} &#8451;</div></div>
-                <div class="weather-item"><div class="label">Condition</div><div class="value">${summary.replace(/_/g, ' ')}</div></div>
-                <div class="weather-item"><div class="label">Humidity</div><div class="value">${details.relative_humidity}%</div></div>
-                <div class="weather-item"><div class="label">Wind Speed</div><div class="value">${details.wind_speed} m/s</div></div>
-                <div class="weather-item"><div class="label">Wind Direction</div><div class="value">${windDir} (${details.wind_from_direction}°)</div></div>
-                <div class="weather-item"><div class="label">Pressure</div><div class="value">${details.air_pressure_at_sea_level} hPa</div></div>
-                <div class="weather-item"><div class="label">Cloud Cover</div><div class="value">${details.cloud_area_fraction}%</div></div>
-                <div class="weather-item"><div class="label">UV Index (clear sky)</div><div class="value">${uv !== null ? uv : 'N/A'}</div></div>
-                <div class="weather-item"><div class="label">Precipitation (1h)</div><div class="value">${precip1h} mm</div></div>
-                <div class="weather-item"><div class="label">Precipitation (6h)</div><div class="value">${precip6h} mm</div></div>
-                <div class="weather-item"><div class="label">Forecast (6h)</div><div class="value">${next6}</div></div>
-                <div class="weather-item"><div class="label">Forecast (12h)</div><div class="value">${next12}</div></div>
+            <div class="animate">
+              <div class="hourly-strip">${hourlyCards}</div>
+            </div>
+            <div class="hero-card animate animate-delay-1">
+              <div class="hero-card-bg" style="background-image:url('${heroImage}')"></div>
+              <div class="hero-card-overlay"></div>
+              <div class="hero-card-content">
+                <div class="hero-location">&#9675; ${lat}, ${lon}</div>
+                <div class="hero-temp-row">
+                  <div class="hero-temp">${details.air_temperature}<sup>°C</sup></div>
+                  <div class="hero-right">
+                    <div class="hero-condition">${summary.replace(/_/g, ' ')}</div>
+                    <div class="hero-feels">Humidity ${details.relative_humidity}%</div>
+                  </div>
+                </div>
+                <div class="hero-divider"></div>
+                <div class="hero-meta">Data: ${dataTime} &nbsp;&middot;&nbsp; Updated: ${updatedAt}</div>
               </div>
             </div>
-            <div class="raw-json">
+            <div class="detail-card animate animate-delay-2">
+              <div class="detail-section-label">Wind &amp; Atmosphere</div>
+              <div class="detail-grid">
+                <div class="detail-item"><div class="detail-label">Wind Speed</div><div class="detail-value">${details.wind_speed} m/s</div></div>
+                <div class="detail-item"><div class="detail-label">Wind Direction</div><div class="detail-value">${windDir} &nbsp;<span style="font-size:0.75rem;color:rgba(255,255,255,0.35)">${details.wind_from_direction}&deg;</span></div></div>
+                <div class="detail-item"><div class="detail-label">Pressure</div><div class="detail-value">${details.air_pressure_at_sea_level} <span style="font-size:0.75rem;font-weight:400;color:rgba(255,255,255,0.4)">hPa</span></div></div>
+                <div class="detail-item"><div class="detail-label">Cloud Cover</div><div class="detail-value">${details.cloud_area_fraction}%</div></div>
+                <div class="detail-item"><div class="detail-label">UV Index</div><div class="detail-value">${uv !== null ? uv : '—'}</div></div>
+              </div>
+              <div class="section-divider"></div>
+              <div class="detail-section-label">Precipitation</div>
+              <div class="detail-grid">
+                <div class="detail-item"><div class="detail-label">Next 1 hour</div><div class="detail-value">${precip1h} <span style="font-size:0.75rem;font-weight:400;color:rgba(255,255,255,0.4)">mm</span></div></div>
+                <div class="detail-item"><div class="detail-label">Next 6 hours</div><div class="detail-value">${precip6h} <span style="font-size:0.75rem;font-weight:400;color:rgba(255,255,255,0.4)">mm</span></div></div>
+              </div>
+              <div class="section-divider"></div>
+              <div class="detail-section-label">Forecast</div>
+              <div class="detail-grid">
+                <div class="detail-item"><div class="detail-label">6 hours</div><div class="detail-value" style="font-size:0.95rem;text-transform:capitalize">${next6}</div></div>
+                <div class="detail-item"><div class="detail-label">12 hours</div><div class="detail-value" style="font-size:0.95rem;text-transform:capitalize">${next12}</div></div>
+              </div>
+            </div>
+            <div class="raw-json animate animate-delay-3">
               <h3>Raw JSON</h3>
               <pre>${JSON.stringify(data, null, 2)}</pre>
             </div>`;
